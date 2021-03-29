@@ -1,9 +1,10 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Company {
-
+    public boolean firstStart = true;
     public static final int EMPLOYEE = 1;
     public static final int MANAGER = 2;
     public static final int DIRECTOR = 3;
@@ -77,6 +78,44 @@ public class Company {
      *
      * @throws Exception
      */
+
+    public List<Employee> getStaff(){
+        return this.staff;
+    }
+    public void setStaff(ArrayList<Employee> staff){
+        this.staff = staff;
+    }
+    public ArrayList<Director> getDirectors(){
+        ArrayList<Director> directors = new ArrayList<Director>();
+        for (Employee employee:staff){
+            int tier = employee.getTier();
+            if(tier == this.DIRECTOR){
+              Director d = (Director)employee;
+              directors.add(d);
+            }
+        }
+        return directors;
+    }
+    public Director getDirector(String department){
+        for (Employee employee:staff){
+            int tier = employee.getTier();
+            if(tier == this.DIRECTOR && employee.getDepartment().equals(department)){
+                Director d = (Director)employee;
+                return d;
+            }
+        }
+        return null;
+    }
+
+    public Employee getEmployee(String name){
+        for (Employee employee:staff){
+            if(employee.getName().equals(name)){
+                return employee;
+            }
+        }
+        return null;
+    }
+
     public void staffMarketingDepartment() throws Exception {
         Director director = this.getDirector("Marketing");
 
@@ -162,6 +201,14 @@ public class Company {
         this.printEmployeeDetails(toAlsoGetRaise);
     }
 
+    private void printEmployeeDetails(Employee employee){
+        System.out.println("Employee     : " + employee.getName());
+        System.out.println("Department   : " + employee.getDepartment());
+        System.out.println("Title        : " + employee.getTitle());
+        System.out.println("Compensation : " + employee.getCompensation());
+        System.out.println();
+    }
+
     /**
      * Verifies that invalid operations fail as expected. DO NOT MODIFY.
      */
@@ -203,6 +250,57 @@ public class Company {
         }
     }
 
+    private void printOrganizationChart(){
+        if(firstStart) {
+            sortStaff();
+            System.out.println("\nQueen Industries Organization Chart");
+        }
+        for (Employee e: staff){
+            if (e.tier == this.DIRECTOR){
+                Director d = (Director)e;
+                System.out.println(" - " + d.name +", " + d.title);
+                ArrayList<Employee> reports = d.reports;
+                if(reports.size() > 0){
+                    for(Employee manager: reports){
+                        if(manager instanceof Manager){
+                            Manager m = (Manager)manager;
+                            System.out.println("   - " + m.name + ", " + m.title);
+                            ArrayList<Employee> mReports = m.reports;
+                            if(mReports.size() > 0){
+                                for(Employee employee : mReports){
+                                    System.out.println("     - " + employee.name + ", " + employee.title);
+                                }
+                            }
+                        } else {
+                            System.out.println("   - " + manager.name + ", " + manager.title);
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    private void sortStaff(){
+        ArrayList<String> titleArray = new ArrayList<String>();
+
+        for(Employee e : staff){
+            String title = e.title;
+            titleArray.add(title);
+        }
+
+        ArrayList<Employee> sortedList = new ArrayList<>();
+        java.util.Collections.sort(titleArray);
+
+        for(String s : titleArray){
+            for(Employee e: staff){
+                if (e.title.equals(s)){
+                    sortedList.add(e);
+                }
+            }
+        }
+        this.staff = sortedList;
+    }
     /**
      * Main method executes tests. DO NOT MODIFY.
      *
